@@ -6,13 +6,13 @@ class FlickDisplayManager extends ChangeNotifier {
   FlickDisplayManager({
     FlickManager? flickManager,
   }) : _flickManager = flickManager {
-    handleShowPlayerControls();
+    //handleShowPlayerControls();
   }
 
   final FlickManager? _flickManager;
   bool _mounted = true;
   Timer? _showPlayerControlsTimer;
-  bool _showPlayerControls = true;
+  bool _showPlayerControls = false;
   bool _showForwardSeek = false;
   bool _showBackwardSeek = false;
 
@@ -30,14 +30,19 @@ class FlickDisplayManager extends ChangeNotifier {
     // If playerControls are showing,
     // cancel the hide timer and hide the controls.
     if (_showPlayerControls) {
-      _showPlayerControls = false;
-      _showPlayerControlsTimer?.cancel();
-      _notify();
+      hidePlayerControls();
     } else {
       // If playerControls are not showing,
       // show player controls.
       handleShowPlayerControls();
     }
+  }
+
+  /// Hide the player controls.
+  hidePlayerControls() {
+    _showPlayerControls = false;
+    _showPlayerControlsTimer?.cancel();
+    _notify();
   }
 
   /// Show the player controls.

@@ -158,18 +158,25 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () {
-        if (_overlayEntry != null) {
-          flickManager.flickControlManager!.exitFullscreen();
-          return Future.value(false);
-        }
-        return Future.value(true);
-      },
-      child: FlickManagerBuilder(
-        flickManager: flickManager,
-        child: widget.flickVideoWithControls,
-      ),
+    // WillPopScope prevents swipe back
+    // TODO: fix this for full screen video
+    return FlickManagerBuilder(
+      flickManager: flickManager,
+      child: widget.flickVideoWithControls,
     );
+
+    // return WillPopScope(
+    //   onWillPop: () {
+    //     if (_overlayEntry != null) {
+    //       flickManager.flickControlManager!.exitFullscreen();
+    //       return Future.value(false);
+    //     }
+    //     return Future.value(true);
+    //   },
+    //   child: FlickManagerBuilder(
+    //     flickManager: flickManager,
+    //     child: widget.flickVideoWithControls,
+    //   ),
+    // );
   }
 }

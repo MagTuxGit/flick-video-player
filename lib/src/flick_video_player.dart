@@ -126,14 +126,25 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
     _setSystemUIOverlays();
     _overlayEntry = OverlayEntry(builder: (context) {
       return Scaffold(
-        body: RotatedBox(
-          quarterTurns: isLandscapeVideo() ? 1 : 0,
-          child: FlickManagerBuilder(
-            flickManager: flickManager,
-            child: widget.flickVideoWithControlsFullscreen ??
-                widget.flickVideoWithControls,
-          ),
-        ),
+        body: GestureDetector(
+          onHorizontalDragEnd: (DragEndDetails details) {
+            if ((details.primaryVelocity ?? 0) > 0) {
+              flickManager.flickControlManager!.toggleFullscreen();
+            }
+          },
+          onVerticalDragEnd: (DragEndDetails details) {
+            if ((details.primaryVelocity ?? 0) > 0) {
+              flickManager.flickControlManager!.toggleFullscreen();
+            }
+          },
+          child: RotatedBox(
+            quarterTurns: isLandscapeVideo() ? 1 : 0,
+            child: FlickManagerBuilder(
+              flickManager: flickManager,
+              child: widget.flickVideoWithControlsFullscreen ??
+                  widget.flickVideoWithControls,
+            ),
+          ),),
       );
     });
 

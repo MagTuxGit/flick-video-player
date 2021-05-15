@@ -71,8 +71,8 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
     flickManager = widget.flickManager;
     flickManager.registerContext(context);
     flickManager.flickControlManager!.addListener(listener);
-    _setSystemUIOverlays();
-    _setPreferredOrientation();
+    //_setSystemUIOverlays();
+    //_setPreferredOrientation();
 
     if (widget.wakelockEnabled) {
       Wakelock.enable();
@@ -99,6 +99,20 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
     }
   }
 
+  bool isLandscapeVideo() {
+    double videoWidth = 1;
+    double videoHeight = 1;
+    final videoPlayerController = flickManager.flickVideoManager
+        ?.videoPlayerController;
+
+    if (videoPlayerController != null) {
+      videoWidth = videoPlayerController.value.size.width;
+      videoHeight = videoPlayerController.value.size.height;
+    }
+
+    return videoWidth > videoHeight;
+  }
+
   _switchToFullscreen() {
     /// Disable previous wakelock setting.
     Wakelock.disable();
@@ -108,14 +122,17 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
     }
 
     _isFullscreen = true;
-    _setPreferredOrientation();
+    //_setPreferredOrientation();
     _setSystemUIOverlays();
     _overlayEntry = OverlayEntry(builder: (context) {
       return Scaffold(
-        body: FlickManagerBuilder(
-          flickManager: flickManager,
-          child: widget.flickVideoWithControlsFullscreen ??
-              widget.flickVideoWithControls,
+        body: RotatedBox(
+          quarterTurns: isLandscapeVideo() ? 1 : 0,
+          child: FlickManagerBuilder(
+            flickManager: flickManager,
+            child: widget.flickVideoWithControlsFullscreen ??
+                widget.flickVideoWithControls,
+          ),
         ),
       );
     });
@@ -135,18 +152,18 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
 
     _overlayEntry?.remove();
     _overlayEntry = null;
-    _setPreferredOrientation();
+    //_setPreferredOrientation();
     _setSystemUIOverlays();
   }
 
-  _setPreferredOrientation() {
-    if (_isFullscreen) {
-      SystemChrome.setPreferredOrientations(
-          widget.preferredDeviceOrientationFullscreen);
-    } else {
-      SystemChrome.setPreferredOrientations(widget.preferredDeviceOrientation);
-    }
-  }
+  // _setPreferredOrientation() {
+  //   if (_isFullscreen) {
+  //     SystemChrome.setPreferredOrientations(
+  //         widget.preferredDeviceOrientationFullscreen);
+  //   } else {
+  //     SystemChrome.setPreferredOrientations(widget.preferredDeviceOrientation);
+  //   }
+  // }
 
   _setSystemUIOverlays() {
     if (_isFullscreen) {

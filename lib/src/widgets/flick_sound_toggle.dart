@@ -67,6 +67,7 @@ class FlickSoundToggle extends StatelessWidget {
 
     return GestureDetector(
         key: key,
+        behavior: HitTestBehavior.opaque,
         onTap: () {
           if (toggleMute != null) {
             toggleMute!();

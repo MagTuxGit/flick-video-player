@@ -78,8 +78,8 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
     flickManager = widget.flickManager;
     flickManager.registerContext(context);
     flickManager.flickControlManager!.addListener(listener);
-    //_setSystemUIOverlays();
-    //_setPreferredOrientation();
+    _setSystemUIOverlays();
+    _setPreferredOrientation();
 
     if (widget.wakelockEnabled) {
       Wakelock.enable();
@@ -136,7 +136,7 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
     }
 
     _isFullscreen = true;
-    //_setPreferredOrientation();
+    _setPreferredOrientation();
     _setSystemUIOverlays();
     if (kIsWeb) {
       document.documentElement?.requestFullscreen();
@@ -144,25 +144,11 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
 
     _overlayEntry = OverlayEntry(builder: (context) {
       return Scaffold(
-        body: GestureDetector(
-          onHorizontalDragEnd: (DragEndDetails details) {
-            if ((details.primaryVelocity ?? 0) > 0) {
-              flickManager.flickControlManager!.toggleFullscreen();
-            }
-          },
-          onVerticalDragEnd: (DragEndDetails details) {
-            if ((details.primaryVelocity ?? 0) > 0) {
-              flickManager.flickControlManager!.toggleFullscreen();
-            }
-          },
-          child: RotatedBox(
-            quarterTurns: isLandscapeVideo() ? 1 : 0,
-            child: FlickManagerBuilder(
-              flickManager: flickManager,
-              child: widget.flickVideoWithControlsFullscreen ??
-                  widget.flickVideoWithControls,
-            ),
-          ),),
+        body: FlickManagerBuilder(
+          flickManager: flickManager,
+          child: widget.flickVideoWithControlsFullscreen ??
+              widget.flickVideoWithControls,
+        ),
       );
     });
 
@@ -184,18 +170,21 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
 
     _overlayEntry?.remove();
     _overlayEntry = null;
-    //_setPreferredOrientation();
+    _setPreferredOrientation();
     _setSystemUIOverlays();
   }
 
-  // _setPreferredOrientation() {
-  //   if (_isFullscreen) {
-  //     SystemChrome.setPreferredOrientations(
-  //         widget.preferredDeviceOrientationFullscreen);
-  //   } else {
-  //     SystemChrome.setPreferredOrientations(widget.preferredDeviceOrientation);
-  //   }
-  // }
+  _setPreferredOrientation() {
+    // when aspect ratio is less than 1 , video will be played in portrait mode and orientation will not be changed.
+    var aspectRatio =
+        widget.flickManager.flickVideoManager!.videoPlayerValue!.aspectRatio;
+    if (_isFullscreen && aspectRatio >= 1) {
+      SystemChrome.setPreferredOrientations(
+          widget.preferredDeviceOrientationFullscreen);
+    } else {
+      SystemChrome.setPreferredOrientations(widget.preferredDeviceOrientation);
+    }
+  }
 
   _setSystemUIOverlays() {
     if (_isFullscreen) {
@@ -222,25 +211,18 @@ class _FlickVideoPlayerState extends State<FlickVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    // WillPopScope prevents swipe back
-    // TODO: fix this for full screen video
-    return FlickManagerBuilder(
-      flickManager: flickManager,
-      child: widget.flickVideoWithControls,
+    return WillPopScope(
+      onWillPop: () {
+        if (_overlayEntry != null) {
+          flickManager.flickControlManager!.exitFullscreen();
+          return Future.value(false);
+        }
+        return Future.value(true);
+      },
+      child: FlickManagerBuilder(
+        flickManager: flickManager,
+        child: widget.flickVideoWithControls,
+      ),
     );
-
-    // return WillPopScope(
-    //   onWillPop: () {
-    //     if (_overlayEntry != null) {
-    //       flickManager.flickControlManager!.exitFullscreen();
-    //       return Future.value(false);
-    //     }
-    //     return Future.value(true);
-    //   },
-    //   child: FlickManagerBuilder(
-    //     flickManager: flickManager,
-    //     child: widget.flickVideoWithControls,
-    //   ),
-    // );
   }
 }
